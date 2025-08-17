@@ -1,0 +1,22 @@
+name: Bot Commit Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Git
+        run: |
+          git config --global user.name "AIMafiaAgent"
+          git config --global user.email "bradleyturnau@gmail.com"
+      - name: Make a test commit
+        run: |
+          echo "Bot was here at $(date)" >> bot-log.txt
+          git add bot-log.txt
+          git commit -m "Bot: test commit"
+      - name: Push changes
+        run: |
+          git push https://x-access-token:${{ secrets.BOT_TOKEN }}@github.com/modern-mafia/aimafia.git HEAD:main
