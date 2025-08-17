@@ -21,35 +21,7 @@ jobs:
           server-dir: /htdocs/
           exclude: |
             **/.git*
-            **/.github/**
+            **/.github*
             **/.gitignore
+            **/node_modules/**
             **/README.md
-            **/LICENSE
-
-on:
-  push:
-    branches:
-      - main   # deploy only when pushing to main branch
-
-jobs:
-  ftp-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: 📂 Sync files to InfinityFree
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /htdocs/mafiagameprototype.great-site.net/
-          local-dir: ./
-          exclude: |
-            **/.git*
-            **/.github/**
-            node_modules/**
-            cache/**
-            logs/**
-            files for your website should be uploaded here!
