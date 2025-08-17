@@ -3,7 +3,7 @@ name: 🚀 Deploy to InfinityFree
 on:
   push:
     branches:
-      - main
+      - main   # deploy only when pushing to main branch
 
 jobs:
   ftp-deploy:
@@ -19,14 +19,11 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /htdocs/mafiagameprototype.great-site.net/
-
           local-dir: ./
- exclude: |
-  **/.git*
-  **/.github/**
-  **/node_modules/**
-  **/cache/**
-  **/logs/**
-  files for your website should be uploaded here!
-
-
+          exclude: |
+            **/.git*
+            **/.github/**
+            node_modules/**
+            cache/**
+            logs/**
+            files for your website should be uploaded here!
