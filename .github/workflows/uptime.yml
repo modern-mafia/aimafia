@@ -1,0 +1,30 @@
+name: 🌐 Check Site Uptime
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # check every 15 minutes
+  workflow_dispatch:          # allow manual run
+
+jobs:
+  uptime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check site availability
+        id: ping
+        run: |
+          if curl -s --head --request GET https://mafiagameprototype.great-site.net/ | grep "200 OK" > /dev/null
+          then
+            echo "status=up" >> $GITHUB_OUTPUT
+          else
+            echo "status=down" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update badge
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          gistID: 2315ba063522dcfd713bfd7f9d1a0c09
+          filename: mafiagame-status.json
+          label: "Play Now"
+          message: ${{ steps.ping.outputs.status }}
+          color: ${{ steps.ping.outputs.status == 'up' && 'brightgreen' || 'red' }}
