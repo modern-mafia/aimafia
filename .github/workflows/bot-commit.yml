@@ -17,7 +17,9 @@ jobs:
           echo "Bot was here at $(date)" >> bot-log.txt
           git add bot-log.txt
           git commit -m "Bot: test commit"
-      - name: Push changes
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+     - name: Push changes
+  uses: ad-m/github-push-action@v0.6.0
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    branch: main
+
