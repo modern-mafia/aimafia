@@ -4,7 +4,7 @@
 
 !\[Deploy](https://github.com/modern-mafia/aimafia/actions/workflows/deploy.yml/badge.svg)  
 
-!\[Play Now](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/modern-mafia/2315ba063522dcfd713bfd7f9d1a0c09/raw/mafiagame-status.json)
+\[!\[Play Now](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/modern-mafia/2315ba063522dcfd713bfd7f9d1a0c09/raw/mafiagame-status.json)](https://mafiagameprototype.great-site.net/)
 
 
 
