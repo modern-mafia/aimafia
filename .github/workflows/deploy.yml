@@ -21,10 +21,12 @@ jobs:
           server-dir: /htdocs/mafiagameprototype.great-site.net/
 
           local-dir: ./
-          exclude: |
-            **/.git*
-            **/.github/**
-            **/node_modules/**
-            **/cache/**
-            **/logs/**
+ exclude: |
+  **/.git*
+  **/.github/**
+  **/node_modules/**
+  **/cache/**
+  **/logs/**
+  files for your website should be uploaded here!
+
 
