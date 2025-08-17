@@ -1,0 +1,296 @@
+body {
+  margin:0; padding:0;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  height: 100vh;
+  overflow:hidden;
+}
+
+/* Top bar */
+.top-nav {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: rgba(0,0,0,0.8);
+  padding:10px;
+  position:fixed;
+  top:0; left:0; right:0;
+}
+.nav-item { margin:0 20px; cursor:pointer; }
+
+/* Sidebars */
+.sidebar {
+  position:fixed;
+  top:50px; bottom:0;
+  width:220px;
+  background: rgba(0,0,0,0.6);
+  padding:10px;
+  overflow-y:auto;
+}
+.left { left:0; }
+.right { right:0; }
+
+/* Center */
+.center-panel {
+  margin-top:80px;
+  text-align:center;
+}
+.avatar {
+  width:150px; height:150px;
+  border-radius:50%;
+  border:4px solid #00ff99;
+}
+.xp-bar {
+  width:300px; height:20px;
+  margin:10px auto;
+  background:#333; border-radius:10px;
+}
+.xp-bar .fill {
+  height:100%; background:#00ff99;
+  border-radius:10px;
+}
+
+/* Weekly spin */
+.weekly-spin { margin-top:40px; }
+#spin-container {
+  width:600px; height:120px;
+  margin:0 auto; position:relative;
+  overflow:hidden;
+  border:3px solid #fff;
+}
+#spin-strip {
+  display:flex;
+  transform:translateX(0);
+}
+.box {
+  width:120px; height:120px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  color:#000;
+}
+.common { background:#ccc; }
+.rare { background:#4da6ff; }
+.epic { background:#a64dff; }
+.legendary { background:gold; }
+.marker {
+  position:absolute;
+  top:0; bottom:0;
+  left:50%; width:3px;
+  background:red;
+}
+#spin-btn {
+  margin-top:10px;
+  padding:10px 20px;
+  font-size:16px;
+  cursor:pointer;
+}
+.online-user {
+  display:flex;
+  align-items:center;
+  margin:5px 0;
+  position:relative;
+}
+.online-user img {
+  width:30px; height:30px;
+  border-radius:50%;
+  margin-right:8px;
+}
+.status {
+  position:absolute;
+  left:22px; bottom:2px;
+  width:10px; height:10px;
+  border-radius:50%;
+  border:2px solid #000;
+}
+.status.green { background:#0f0; }
+.status.amber { background:#ff9900; }
+.status.red { background:#f00; }
+.name {
+  font-size:14px;
+}
+/* === Global Glow & Smooth UI === */
+body {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #e0e0e0;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* === Top Nav Bar === */
+.top-nav {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#111;
+  padding:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.5);
+}
+.nav-item {
+  margin:0 25px;
+  font-weight:bold;
+  cursor:pointer;
+  position:relative;
+  transition:all 0.2s ease-in-out;
+}
+.nav-item:hover {
+  color:#0ff;
+  text-shadow:0 0 10px #0ff;
+}
+
+/* === Sidebars (Mission / Online Players) === */
+.sidebar {
+  position:fixed;
+  top:50px;
+  bottom:0;
+  width:240px;
+  background:rgba(15,15,15,0.9);
+  padding:20px;
+  overflow-y:auto;
+  box-shadow:inset 0 0 20px rgba(0,0,0,0.8);
+}
+.sidebar.left { left:0; }
+.sidebar.right { right:0; }
+.sidebar h3 {
+  margin-top:0;
+  font-size:16px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  padding-bottom:8px;
+}
+
+/* === Online Users === */
+.online-user {
+  display:flex;
+  align-items:center;
+  margin:10px 0;
+  padding:6px;
+  border-radius:8px;
+  background:rgba(255,255,255,0.05);
+  transition:all 0.2s;
+}
+.online-user:hover {
+  background:rgba(0,255,255,0.15);
+  box-shadow:0 0 10px rgba(0,255,255,0.4);
+  transform:scale(1.02);
+}
+.online-user img {
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  margin-right:10px;
+}
+.status {
+  width:10px; height:10px;
+  border-radius:50%;
+  margin-right:6px;
+}
+.status.green { background:#0f0; }
+.status.amber { background:#ff9900; }
+.status.red { background:#f00; }
+
+/* === Center Panel (Avatar + Stats) === */
+.center-panel {
+  margin:80px auto;
+  width:500px;
+  text-align:center;
+  background:rgba(20,20,20,0.8);
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 0 25px rgba(0,255,255,0.2);
+}
+.center-panel .avatar {
+  width:120px;
+  border-radius:50%;
+  border:4px solid #0ff;
+  margin-bottom:10px;
+  transition:all 0.3s;
+}
+.center-panel .avatar:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 20px #0ff;
+}
+.xp-bar {
+  width:100%; height:16px;
+  background:#333;
+  border-radius:8px;
+  margin:15px 0;
+  overflow:hidden;
+}
+.xp-bar .fill {
+  height:100%;
+  background:linear-gradient(90deg, #0ff, #0f0);
+  transition:width 1s ease-in-out;
+}
+
+/* === Weekly Spin === */
+.weekly-spin {
+  margin-top:20px;
+}
+#spin-container {
+  position:relative;
+  width:480px;
+  height:120px;
+  overflow:hidden;
+  margin:20px auto;
+  border:2px solid #444;
+  border-radius:12px;
+  background:rgba(0,0,0,0.6);
+}
+#spin-strip {
+  display:flex;
+  transition:transform 4s cubic-bezier(.17,.67,.83,.67);
+}
+#spin-strip .box {
+  width:120px; height:120px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:14px;
+  font-weight:bold;
+  border:1px solid rgba(255,255,255,0.1);
+  text-align:center;
+  color:#fff;
+  transition:all 0.3s;
+}
+#spin-strip .box.common { background:#444; }
+#spin-strip .box.rare { background:#007bff; }
+#spin-strip .box.epic { background:#8000ff; }
+#spin-strip .box.legendary { background:#ff8000; }
+#spin-strip .box:hover {
+  transform:scale(1.1);
+  box-shadow:0 0 15px rgba(255,255,255,0.6);
+}
+.marker {
+  position:absolute;
+  top:0; bottom:0;
+  left:50%;
+  width:4px;
+  background:#0ff;
+  box-shadow:0 0 10px #0ff,0 0 20px #0ff;
+}
+
+/* === Spin Button === */
+#spin-btn {
+  background:#0ff;
+  border:none;
+  padding:12px 24px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  transition:all 0.2s;
+}
+#spin-btn:hover {
+  background:#00ffaa;
+  box-shadow:0 0 20px #0ff;
+  transform:scale(1.05);
+}

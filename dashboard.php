@@ -1,153 +1,134 @@
 <?php
-session_start();
-require_once "includes/db.php";
 require_once "includes/session.php";
+require_once "includes/db.php";
 
-// Fetch user info
-$user_id = $_SESSION['user_id'];
-$stmt = $pdo->prepare("SELECT username, avatar, last_spin FROM users WHERE id = ?");
-$stmt->execute([$user_id]);
+// Fetch user
+$stmt = $pdo->prepare("SELECT id, username, rank, cash, avatar, last_spin FROM users WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Weekly spin check
-$can_spin = false;
-if ($user && $user['last_spin']) {
-    $lastSpin = new DateTime($user['last_spin']);
-    $nextSpin = $lastSpin->modify('+7 days');
-    $can_spin = (new DateTime() >= $nextSpin);
-} else {
-    $can_spin = true; // never spun before
+// Spin availability
+$can_spin = true;
+if ($user['last_spin']) {
+    $last = new DateTime($user['last_spin']);
+    $now = new DateTime();
+    $diff = $last->diff($now)->days;
+    if ($diff < 7) $can_spin = false;
 }
+
+// Fetch online users
+$online_stmt = $pdo->query("SELECT username, avatar, last_active FROM users ORDER BY last_active DESC LIMIT 20");
+$online_users = $online_stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>AIMafia Dashboard</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-  <style>
-    body {
-      margin: 0;
-      background: url('street_bg.png') no-repeat center center fixed;
-      background-size: cover;
-      position: relative;
-      font-family: 'Segoe UI', sans-serif;
-    }
-    body::after {
-      content: "";
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(6px);
-      z-index: -1;
-    }
-    .topbar {
-      height: 60px;
-      background: #111;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 1000;
-    }
-    .topbar .nav-icons i {
-      font-size: 1.3rem;
-      margin: 0 10px;
-      cursor: pointer;
-    }
-    .sidebar {
-      position: fixed;
-      top: 60px;
-      bottom: 0;
-      width: 200px;
-      background: #1a1a1a;
-      color: #fff;
-      padding: 15px;
-      overflow-y: auto;
-    }
-    .sidebar.left { left: 0; }
-    .sidebar.right { right: 0; }
-    .content {
-      margin-top: 80px;
-      margin-left: 220px;
-      margin-right: 220px;
-      color: #fff;
-    }
-    .avatar {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .spin-card {
-      background: #222;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 0 12px rgba(0,0,0,0.6);
-    }
-    .btn-spin {
-      margin-top: 15px;
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-  <div class="topbar">
-    <div class="nav-icons">
-      <i class="bi bi-house-door"></i>
-      <i class="bi bi-coin"></i>
-      <i class="bi bi-controller"></i>
-      <i class="bi bi-graph-up"></i>
-    </div>
-    <div class="user-info">
-      <img src="<?php echo $user['avatar'] ?: 'default_avatar.png'; ?>" alt="Avatar" class="avatar">
-      <span class="ms-2"><?php echo htmlspecialchars($user['username']); ?></span>
-    </div>
-  </div>
 
-  <div class="sidebar left">
-    <h5>Navigation</h5>
-    <ul class="nav flex-column">
-      <li class="nav-item"><a href="dashboard.php" class="nav-link text-white">Dashboard</a></li>
-      <li class="nav-item"><a href="crimes.php" class="nav-link text-white">Crimes</a></li>
-      <li class="nav-item"><a href="casino.php" class="nav-link text-white">Casino</a></li>
-    </ul>
-  </div>
+<!-- Top Nav -->
+<div class="top-nav">
+  <div class="nav-item">INVENTORY</div>
+  <div class="nav-item">LOADOUT</div>
+  <div class="nav-item">PLAY</div>
+  <div class="nav-item">STORE</div>
+</div>
 
-  <div class="sidebar right">
-    <h5>Stats</h5>
-    <p>Cash: $1000</p>
-    <p>Bank: $5000</p>
-  </div>
+<!-- Left Sidebar -->
+<div class="sidebar left">
+  <h3>Missions</h3>
+  <div class="mission">Next mission in 3 days</div>
+  <div class="mission">Special Event soon</div>
+</div>
 
-  <div class="content container">
-    <div class="row">
-      <div class="col-md-6 offset-md-3">
-        <div class="spin-card">
-          <h4>Weekly Spin</h4>
-          <?php if ($can_spin): ?>
-            <button id="spin-btn" class="btn btn-success btn-spin">Spin Now 🎰</button>
-          <?php else: ?>
-            <button class="btn btn-secondary btn-spin" disabled>Come back next week</button>
-          <?php endif; ?>
-        </div>
+<!-- Right Sidebar -->
+<div class="sidebar right">
+  <h3>Players Online</h3>
+  <div id="online-users">
+    <?php foreach ($online_users as $ou): 
+      // Status calc
+      $last_active = strtotime($ou['last_active']);
+      $now = time();
+      $diff = $now - $last_active;
+      if ($diff < 60) $status = "green";
+      elseif ($diff < 300) $status = "amber";
+      else $status = "red";
+    ?>
+      <div class="online-user">
+        <img src="assets/avatars/<?php echo $ou['avatar'] ?: 'default_avatar.png'; ?>" alt="user">
+        <span class="status <?php echo $status; ?>"></span>
+        <span class="name"><?php echo htmlspecialchars($ou['username']); ?></span>
       </div>
-    </div>
+    <?php endforeach; ?>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-    $("#spin-btn").on("click", function() {
-      $.post("weekly_spin_save.php", { user_id: <?php echo (int)$user_id; ?> }, function(response) {
-        alert(response.message);
-        location.reload();
-      }, "json");
+  <h3>Activity Feed</h3>
+  <div id="activity-feed">
+    <div class="feed-item">PlayerX joined a gang</div>
+    <div class="feed-item">PlayerY won $500 in Blackjack</div>
+  </div>
+</div>
+
+<!-- Center Panel -->
+<div class="center-panel">
+  <img class="avatar" src="assets/avatars/<?php echo $user['avatar'] ?: 'default_avatar.png'; ?>" alt="avatar">
+  <h2><?php echo htmlspecialchars($user['username']); ?></h2>
+  <p>Rank: <?php echo htmlspecialchars($user['rank']); ?> | Cash: $<?php echo $user['cash']; ?></p>
+  
+  <!-- XP bar -->
+  <div class="xp-bar"><div class="fill" style="width:60%"></div></div>
+
+  <!-- Weekly Spin -->
+  <div class="weekly-spin">
+    <h3>Weekly Spin</h3>
+    <?php if ($can_spin): ?>
+      <div id="spin-container">
+        <div id="spin-strip"></div>
+        <div class="marker"></div>
+      </div>
+      <button id="spin-btn">Spin Now</button>
+    <?php else: ?>
+      <p>Spin available in a few days</p>
+    <?php endif; ?>
+  </div>
+</div>
+
+<script>
+// Populate spin strip
+const rewards = [
+  {name:"Cash $100", rarity:"common"},
+  {name:"Cash $500", rarity:"rare"},
+  {name:"Cash $1000", rarity:"epic"},
+  {name:"Exclusive Skin", rarity:"legendary"},
+  {name:"Gang Influence +10", rarity:"rare"},
+  {name:"XP Boost", rarity:"common"}
+];
+const strip = $("#spin-strip");
+for (let i=0;i<30;i++) {
+  let r = rewards[Math.floor(Math.random()*rewards.length)];
+  strip.append(`<div class="box ${r.rarity}">${r.name}</div>`);
+}
+
+$("#spin-btn").click(function(){
+  $(this).prop("disabled", true);
+  const roll = Math.floor(Math.random()*rewards.length);
+  const stopIndex = 20 + roll;
+  const offset = -stopIndex*120 + 240; // center prize
+  strip.css("transition","transform 4s cubic-bezier(.17,.67,.83,.67)");
+  strip.css("transform",`translateX(${offset}px)`);
+  setTimeout(()=>{
+    const reward = rewards[roll];
+    alert("You won: " + reward.name);
+    $.post("weekly_spin_save.php",{reward:reward.name},function(res){
+      console.log(res);
     });
-  </script>
+  },4000);
+});
+</script>
+
 </body>
 </html>
