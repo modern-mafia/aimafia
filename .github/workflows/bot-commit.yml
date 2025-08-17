@@ -1,18 +1,18 @@
-name: Bot Commit Test
+name: Bot Commit
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
-  schedule:
-    - cron: "0 12 * * *"   # daily at 12:00 UTC
+    inputs:
+      filename:
+        description: "File to update/create (e.g. index.php)"
+        required: true
+      content:
+        description: "Content to write into the file"
+        required: true
 
 jobs:
   commit:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write   # allow pushing commits
     steps:
       - uses: actions/checkout@v3
 
@@ -21,14 +21,13 @@ jobs:
           git config --global user.name "AIMafiaAgent"
           git config --global user.email "bradleyturnauiwe@gmail.com"
 
-      - name: Make a test commit
+      - name: Apply file change
         run: |
-          echo "Bot was here at $(date)" >> bot-log.txt
-          git add bot-log.txt
-          git commit -m "Bot: test commit" || echo "No changes to commit"
+          echo "${{ github.event.inputs.content }}" > "${{ github.event.inputs.filename }}"
+          git add "${{ github.event.inputs.filename }}"
+          git commit -m "Bot updated ${{ github.event.inputs.filename }}"
 
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
