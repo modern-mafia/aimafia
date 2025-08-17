@@ -1,13 +1,5 @@
 \# AIMafia Game
 
-
-
-!\[Deploy](https://github.com/modern-mafia/aimafia/actions/workflows/deploy.yml/badge.svg)  
-
-\[!\[Play Now](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/modern-mafia/2315ba063522dcfd713bfd7f9d1a0c09/raw/mafiagame-status.json)](https://mafiagameprototype.great-site.net/)
-
-
-
 A browser-based Mafia game prototype, inspired by classic text-MMO crime and casino games.  
 
 Hosted on \*\*InfinityFree\*\*, with auto-deploy via \*\*GitHub Actions\*\*.  
