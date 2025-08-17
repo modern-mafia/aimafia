@@ -1,296 +1,234 @@
-body {
-  margin:0; padding:0;
-  font-family: Arial, sans-serif;
-  color: #fff;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  height: 100vh;
-  overflow:hidden;
-}
+<?php
+session_start();
+require_once "includes/db.php";
+require_once "includes/session.php";
 
-/* Top bar */
-.top-nav {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background: rgba(0,0,0,0.8);
-  padding:10px;
-  position:fixed;
-  top:0; left:0; right:0;
-}
-.nav-item { margin:0 20px; cursor:pointer; }
+// Example: fetch user info (adapt to your schema)
+$stmt = $pdo->prepare("SELECT username, cash FROM users WHERE id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-/* Sidebars */
-.sidebar {
-  position:fixed;
-  top:50px; bottom:0;
-  width:220px;
-  background: rgba(0,0,0,0.6);
-  padding:10px;
-  overflow-y:auto;
-}
-.left { left:0; }
-.right { right:0; }
+// Count online players (active in last 5 mins)
+$onlineStmt = $pdo->query("SELECT COUNT(*) FROM users WHERE last_active > (NOW() - INTERVAL 5 MINUTE)");
+$playersOnline = $onlineStmt->fetchColumn();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AIMafia Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    /* Top bar */
+    #topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      border-bottom: 2px solid #333;
+      z-index: 1000;
+    }
+    #topbar a {
+      color: #eee;
+      text-decoration: none;
+      font-size: 20px;
+    }
+    #topbar a:hover {
+      color: gold;
+    }
 
-/* Center */
-.center-panel {
-  margin-top:80px;
-  text-align:center;
-}
-.avatar {
-  width:150px; height:150px;
-  border-radius:50%;
-  border:4px solid #00ff99;
-}
-.xp-bar {
-  width:300px; height:20px;
-  margin:10px auto;
-  background:#333; border-radius:10px;
-}
-.xp-bar .fill {
-  height:100%; background:#00ff99;
-  border-radius:10px;
-}
+    /* Side menus */
+    #left-menu, #right-menu {
+      width: 200px;
+      background: #1c1c1c;
+      padding-top: 60px; /* aligns with topbar */
+      position: fixed;
+      top: 0;
+      bottom: 0;
+    }
+    #left-menu { left: 0; }
+    #right-menu { right: 0; }
+    #left-menu ul, #right-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #left-menu li, #right-menu li {
+      padding: 12px;
+      border-bottom: 1px solid #333;
+    }
+    #left-menu li:hover, #right-menu li:hover {
+      background: #333;
+    }
 
-/* Weekly spin */
-.weekly-spin { margin-top:40px; }
-#spin-container {
-  width:600px; height:120px;
-  margin:0 auto; position:relative;
-  overflow:hidden;
-  border:3px solid #fff;
-}
-#spin-strip {
-  display:flex;
-  transform:translateX(0);
-}
-.box {
-  width:120px; height:120px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:14px;
-  color:#000;
-}
-.common { background:#ccc; }
-.rare { background:#4da6ff; }
-.epic { background:#a64dff; }
-.legendary { background:gold; }
-.marker {
-  position:absolute;
-  top:0; bottom:0;
-  left:50%; width:3px;
-  background:red;
-}
-#spin-btn {
-  margin-top:10px;
-  padding:10px 20px;
-  font-size:16px;
-  cursor:pointer;
-}
-.online-user {
-  display:flex;
-  align-items:center;
-  margin:5px 0;
-  position:relative;
-}
-.online-user img {
-  width:30px; height:30px;
-  border-radius:50%;
-  margin-right:8px;
-}
-.status {
-  position:absolute;
-  left:22px; bottom:2px;
-  width:10px; height:10px;
-  border-radius:50%;
-  border:2px solid #000;
-}
-.status.green { background:#0f0; }
-.status.amber { background:#ff9900; }
-.status.red { background:#f00; }
-.name {
-  font-size:14px;
-}
-/* === Global Glow & Smooth UI === */
-body {
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #e0e0e0;
-}
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+    /* Main content */
+    #main {
+      margin: 80px 220px; /* space for sidebars and topbar */
+      flex: 1;
+      text-align: center;
+    }
 
-/* === Top Nav Bar === */
-.top-nav {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#111;
-  padding:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.5);
-}
-.nav-item {
-  margin:0 25px;
-  font-weight:bold;
-  cursor:pointer;
-  position:relative;
-  transition:all 0.2s ease-in-out;
-}
-.nav-item:hover {
-  color:#0ff;
-  text-shadow:0 0 10px #0ff;
-}
+    /* Avatar */
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #444;
+    }
 
-/* === Sidebars (Mission / Online Players) === */
-.sidebar {
-  position:fixed;
-  top:50px;
-  bottom:0;
-  width:240px;
-  background:rgba(15,15,15,0.9);
-  padding:20px;
-  overflow-y:auto;
-  box-shadow:inset 0 0 20px rgba(0,0,0,0.8);
-}
-.sidebar.left { left:0; }
-.sidebar.right { right:0; }
-.sidebar h3 {
-  margin-top:0;
-  font-size:16px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  border-bottom:1px solid rgba(255,255,255,0.1);
-  padding-bottom:8px;
-}
+    /* Weekly spin */
+    #weekly-spin-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    #spin-window {
+      width: 500px; /* 5 blocks * 100px each */
+      height: 120px;
+      overflow: hidden;
+      border: 3px solid #444;
+      background: #111;
+      position: relative;
+    }
+    #spin-strip {
+      display: flex;
+      transition: transform 3s cubic-bezier(.17,.67,.83,.67);
+    }
+    .spin-block {
+      width: 100px;
+      height: 100px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
+      color: white;
+      border-radius: 8px;
+    }
+    .common { background: #555; }
+    .uncommon { background: #2e8b57; }
+    .rare { background: #1e90ff; }
+    .epic { background: #8a2be2; }
+    .legendary { background: gold; color: black; }
 
-/* === Online Users === */
-.online-user {
-  display:flex;
-  align-items:center;
-  margin:10px 0;
-  padding:6px;
-  border-radius:8px;
-  background:rgba(255,255,255,0.05);
-  transition:all 0.2s;
-}
-.online-user:hover {
-  background:rgba(0,255,255,0.15);
-  box-shadow:0 0 10px rgba(0,255,255,0.4);
-  transform:scale(1.02);
-}
-.online-user img {
-  width:32px;
-  height:32px;
-  border-radius:50%;
-  margin-right:10px;
-}
-.status {
-  width:10px; height:10px;
-  border-radius:50%;
-  margin-right:6px;
-}
-.status.green { background:#0f0; }
-.status.amber { background:#ff9900; }
-.status.red { background:#f00; }
+    #spin-button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: gold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #spin-button:hover {
+      background: orange;
+    }
 
-/* === Center Panel (Avatar + Stats) === */
-.center-panel {
-  margin:80px auto;
-  width:500px;
-  text-align:center;
-  background:rgba(20,20,20,0.8);
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 0 25px rgba(0,255,255,0.2);
-}
-.center-panel .avatar {
-  width:120px;
-  border-radius:50%;
-  border:4px solid #0ff;
-  margin-bottom:10px;
-  transition:all 0.3s;
-}
-.center-panel .avatar:hover {
-  transform:scale(1.05);
-  box-shadow:0 0 20px #0ff;
-}
-.xp-bar {
-  width:100%; height:16px;
-  background:#333;
-  border-radius:8px;
-  margin:15px 0;
-  overflow:hidden;
-}
-.xp-bar .fill {
-  height:100%;
-  background:linear-gradient(90deg, #0ff, #0f0);
-  transition:width 1s ease-in-out;
-}
+    /* Info panels */
+    .info-box {
+      margin: 20px auto;
+      padding: 15px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      width: 300px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top bar -->
+  <div id="topbar">
+    <a href="dashboard.php"><i class="fas fa-home"></i></a>
+    <a href="casino.php"><i class="fas fa-dice"></i></a>
+    <a href="pvp.php"><i class="fas fa-crosshairs"></i></a>
+    <a href="territory.php"><i class="fas fa-map"></i></a>
+    <a href="logout.php"><i class="fas fa-sign-out-alt"></i></a>
+  </div>
 
-/* === Weekly Spin === */
-.weekly-spin {
-  margin-top:20px;
-}
-#spin-container {
-  position:relative;
-  width:480px;
-  height:120px;
-  overflow:hidden;
-  margin:20px auto;
-  border:2px solid #444;
-  border-radius:12px;
-  background:rgba(0,0,0,0.6);
-}
-#spin-strip {
-  display:flex;
-  transition:transform 4s cubic-bezier(.17,.67,.83,.67);
-}
-#spin-strip .box {
-  width:120px; height:120px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:14px;
-  font-weight:bold;
-  border:1px solid rgba(255,255,255,0.1);
-  text-align:center;
-  color:#fff;
-  transition:all 0.3s;
-}
-#spin-strip .box.common { background:#444; }
-#spin-strip .box.rare { background:#007bff; }
-#spin-strip .box.epic { background:#8000ff; }
-#spin-strip .box.legendary { background:#ff8000; }
-#spin-strip .box:hover {
-  transform:scale(1.1);
-  box-shadow:0 0 15px rgba(255,255,255,0.6);
-}
-.marker {
-  position:absolute;
-  top:0; bottom:0;
-  left:50%;
-  width:4px;
-  background:#0ff;
-  box-shadow:0 0 10px #0ff,0 0 20px #0ff;
-}
+  <!-- Side menus -->
+  <div id="left-menu">
+    <ul>
+      <li>Profile</li>
+      <li>Inventory</li>
+      <li>Crimes</li>
+      <li>Jobs</li>
+    </ul>
+  </div>
+  <div id="right-menu">
+    <ul>
+      <li>Leaderboard</li>
+      <li>Messages</li>
+      <li>Settings</li>
+    </ul>
+  </div>
 
-/* === Spin Button === */
-#spin-btn {
-  background:#0ff;
-  border:none;
-  padding:12px 24px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
-  transition:all 0.2s;
-}
-#spin-btn:hover {
-  background:#00ffaa;
-  box-shadow:0 0 20px #0ff;
-  transform:scale(1.05);
-}
+  <!-- Main content -->
+  <div id="main">
+    <h2>Welcome, <?php echo htmlspecialchars($user['username']); ?>!</h2>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAAAAACPAi4CAA..."
+         alt="avatar" class="avatar">
+    <div class="info-box">Cash: $<?php echo number_format($user['cash']); ?></div>
+    <div class="info-box">Players Online: <?php echo $playersOnline; ?></div>
+
+    <!-- Weekly spin -->
+    <div id="weekly-spin-container">
+      <h3>Weekly Spin</h3>
+      <div id="spin-window">
+        <div id="spin-strip"></div>
+      </div>
+      <button id="spin-button">Spin</button>
+    </div>
+  </div>
+
+  <script>
+    const rewards = [
+      {name: "100 Cash", class: "common"},
+      {name: "500 Cash", class: "uncommon"},
+      {name: "1k Cash", class: "rare"},
+      {name: "Epic Car", class: "epic"},
+      {name: "Legendary Mansion", class: "legendary"},
+    ];
+
+    const strip = document.getElementById("spin-strip");
+    const button = document.getElementById("spin-button");
+
+    // build a long strip of rewards
+    function buildStrip() {
+      strip.innerHTML = "";
+      for (let i = 0; i < 30; i++) { // repeat to scroll through
+        const reward = rewards[i % rewards.length];
+        const block = document.createElement("div");
+        block.className = "spin-block " + reward.class;
+        block.textContent = reward.name;
+        strip.appendChild(block);
+      }
+    }
+    buildStrip();
+
+    button.addEventListener("click", () => {
+      const blocks = document.querySelectorAll(".spin-block");
+      const winnerIndex = Math.floor(Math.random() * (blocks.length - 6)) + 2;
+      const offset = -winnerIndex * 100; // each block width
+      strip.style.transition = "transform 3s cubic-bezier(.17,.67,.83,.67)";
+      strip.style.transform = `translateX(${offset}px)`;
+    });
+  </script>
+</body>
+</html>
